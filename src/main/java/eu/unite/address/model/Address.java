@@ -1,6 +1,13 @@
-package eu.unite.address.service;
+package eu.unite.address.model;
 
-public class AddressesResource {
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.Id;
+
+@Entity
+public class Address {
+    @Id
     private  String id;
     private  String userId;
     private  String addressName;
@@ -9,6 +16,7 @@ public class AddressesResource {
     private  String postalCode;
     private  String region;
     private  String country;
+    @Enumerated(EnumType.STRING)
     private  AddressType type;
 
   public String getId() {
