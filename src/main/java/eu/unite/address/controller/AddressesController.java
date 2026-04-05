@@ -1,6 +1,8 @@
 package eu.unite.address.controller;
 
 import java.util.List;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,9 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.unite.address.model.Address;
 import eu.unite.address.model.AddressType;
 import eu.unite.address.repository.AddressesRepository;
+import eu.unite.address.exception.ErrorResponse;
 
 @RestController
-@RequestMapping("/addresses")
+@RequestMapping("/api/addresses")
 public class AddressesController {
 
     private final AddressesRepository addressesRepository;
@@ -21,20 +24,30 @@ public class AddressesController {
     }
 
     @GetMapping
-    public List<Address> getAddresses(
+    public ResponseEntity<?> getAddresses(
             @RequestParam(required = false) String userId,
             @RequestParam(required = false) String type) {
 
-        if (userId != null && type != null) {
-            AddressType addressType = AddressType.valueOf(type);
-            return addressesRepository.findByUserIdAndType(userId, addressType);
-        } else if (userId != null) {
-            return addressesRepository.findByUserId(userId);
-        } else if (type != null) {
-            AddressType addressType = AddressType.valueOf(type);
-            return addressesRepository.findByType(addressType);
-        } else {
-            return addressesRepository.findAll();
+        AddressType addressType = null;
+        if (type != null) {
+            try {
+                addressType = AddressType.valueOf(type);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Invalid address type: " + type));
+            }
         }
+
+        List<Address> results = null;
+        if (userId != null && addressType != null) {
+            results = addressesRepository.findByUserIdAndType(userId, addressType);
+        } else if (userId != null) {
+            results = addressesRepository.findByUserId(userId);
+        } else if (addressType != null) {
+            results = addressesRepository.findByType(addressType);
+        } else {
+            results = addressesRepository.findAll();
+        }
+
+        return ResponseEntity.ok(results);
     }
 }
