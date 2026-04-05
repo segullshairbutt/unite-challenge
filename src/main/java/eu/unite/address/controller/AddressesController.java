@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import eu.unite.address.model.Address;
 import eu.unite.address.model.AddressType;
 import eu.unite.address.repository.AddressesRepository;
+import eu.unite.address.repository.AddressSpecification;
 import eu.unite.address.exception.ErrorResponse;
 
 @RestController
@@ -37,17 +38,6 @@ public class AddressesController {
             }
         }
 
-        List<Address> results = null;
-        if (userId != null && addressType != null) {
-            results = addressesRepository.findByUserIdAndType(userId, addressType);
-        } else if (userId != null) {
-            results = addressesRepository.findByUserId(userId);
-        } else if (addressType != null) {
-            results = addressesRepository.findByType(addressType);
-        } else {
-            results = addressesRepository.findAll();
-        }
-
-        return ResponseEntity.ok(results);
+        return ResponseEntity.ok(addressesRepository.findAll(AddressSpecification.buildUserAndTypeQuerySpecification(userId, addressType)));
     }
 }
